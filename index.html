@@ -64,7 +64,7 @@
 
 
 		var span = null;
-		var reg = /mine/;
+		var reg = /(\s|^)mine(\s|$)/;
 		window.onload = init;		
 
 		//初始化
@@ -86,7 +86,7 @@
 			var num = 0;
 			do{
 				var s = span[Math.floor(Math.random()*row*col)];
-				!reg.test(s) && s.classList.add('mine'), num++; 
+				!reg.test(s.classList.value) && (s.classList.add('mine'), num++); 
 			}while(num != mine_num);
 		}
 
@@ -120,10 +120,14 @@
 		//点击
 		function click(){
 
-			function el_reg(el){
+			function el_reg(el, i){
+
 				var num = el.getAttribute('data-num');
 				num && (el.click());
+
 				var bool = !num && !reg.test(el.classList.value) && !/(\s|^)(clicked|flag)(\s|$)/.test(el.classList.value);
+				bool && (el.classList.add('clicked'), blank(el, i))
+
 				return bool;
 			}
 
@@ -131,32 +135,35 @@
 				el.classList.add('clicked');
 
 				//左上
-				span[i-col-1] && i%col!=0 && el_reg(span[i-col-1]) && (span[i-col-1].classList.add('clicked'), blank(span[i-col-1], i-col-1));
-					//上
-				span[i-col] && el_reg(span[i-col]) && (span[i-col].classList.add('clicked'), blank(span[i-col], i-col));
-					//上右
-				span[i-col+1] && (i-col+1)%col!=0 && el_reg(span[i-col+1]) && (span[i-col+1].classList.add('clicked'), blank(span[i-col+1], i-col+1));
-					//右
-				span[i+1] && (i+1)%col!=0 && el_reg(span[i+1]) && (span[i+1].classList.add('clicked'), blank(span[i+1], i+1));
-					//右下
-				span[i+col+1] && (i+col+1)%col!=0 && el_reg(span[i+col+1]) && (span[i+col+1].classList.add('clicked'), blank(span[i+col+1], i+col+1));
-					//下
-				span[i+col] && el_reg(span[i+col]) && (span[i+col].classList.add('clicked'), blank(span[i+col], i+col));
-					//下左
-				span[i+col-1] && i%col!=0 && el_reg(span[i+col-1]) && (span[i+col-1].classList.add('clicked'), blank(span[i+col-1], i+col-1));
-					//左
-				span[i-1] && i%col!=0 && el_reg(span[i-1]) && (span[i-1].classList.add('clicked'), blank(span[i-1], i-1));
+				span[i-col-1] && i%col!=0 && el_reg(span[i-col-1], i-col-1);
+				//上
+				span[i-col] && el_reg(span[i-col], i-col);
+				//上右
+				span[i-col+1] && (i-col+1)%col!=0 && el_reg(span[i-col+1], i-col+1);
+				//右
+				span[i+1] && (i+1)%col!=0 && el_reg(span[i+1], i+1);
+				//右下
+				span[i+col+1] && (i+col+1)%col!=0 && el_reg(span[i+col+1], i+col+1);
+				//下
+				span[i+col] && el_reg(span[i+col], i+col);
+				//下左
+				span[i+col-1] && i%col!=0 && el_reg(span[i+col-1], i+col-1);
+				//左
+				span[i-1] && i%col!=0 && el_reg(span[i-1], i-1);
 			}
 
 			span.forEach(function(el, i){
+
+				//点击
 				el.onclick = function(){
 
+					//点击过或者标记的不可再点
 					var flaged = /(\s|^)(clicked|flag)(\s|$)/.test(this.classList.value);
 					if(flaged){
 						return;
 					}
 
-					//是雷
+					//点击雷
 					var mine = reg.test(el.classList.value);
 					if(mine){
 						document.querySelectorAll('.mine').forEach(function(el, i){
@@ -169,18 +176,22 @@
 						return;
 					}
 
-					//周边有雷
+					//点击雷周边
 					var num = this.getAttribute('data-num');
 					num && (this.classList.add('clicked'), this.innerHTML = num);
 
 					//空
 					num === null && blank(el, i);
 
+
+					//只剩雷时胜利
 					if(document.querySelectorAll('.clicked').length == col*row-mine_num){
 						alert('YOU WIN');
 						init();
 					}
 				}
+
+				//右键标记
 				el.oncontextmenu = function(e){
 					e.preventDefault();
 					if(/(\s|^)clicked(\s|$)/.test(this.classList.value)){
@@ -189,6 +200,7 @@
 					var has = /(\s|^)flag(\s|$)/.test(this.classList.value);
 					has? this.classList.remove('flag') : this.classList.add('flag');
 				}
+
 			})
 		}
 	</script>
