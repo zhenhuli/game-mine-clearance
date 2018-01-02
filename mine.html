@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no minimal-ui">
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+		.wrap{
+			position: fixed;
+			left: 0;
+			top: 0;
+			right: 0;
+			bottom: 0;
+			margin: auto;
+			width: 300px;
+			height: 300px;
+			font-size: 0;
+			user-select: none;
+		}
+		span{
+			display: inline-block;
+			width: 30px;
+			height: 30px;
+			background: #ccc;
+			border: 1px solid #fff;
+			vertical-align: middle;
+			font-size: 14px;
+			text-align: center;
+			line-height: 28px;
+		}
+		.clicked{
+			background: #eee;
+		}
+		.boom{
+			background: #f00;
+		}
+		.flag:after{
+			content: '';
+			display: block;
+			width: 40%;
+			height: 40%;
+			margin: 30%;
+			background: #f00;
+			border-radius: 50%;
+		}
+	</style>
+</head>
+<body>
+	<div class="wrap"></div>
+
+	<script>
+		//雷数量
+		var mine_num = 15;
+		//行
+		var row = 10;
+		//列
+		var col = 10;
+
+
+		var span = null;
+		var reg = /mine/;
+		window.onload = init;		
+
+		//初始化
+		function init(){
+			var str = '';
+			for(i=0; i<100; i++){
+				str += '<span></span>';
+			}
+			document.querySelector('.wrap').innerHTML = str;
+			span = document.querySelectorAll('.wrap span');
+
+			setmine();
+			setNum();
+			click();
+		}
+		
+		// 埋雷
+		function setmine(){
+			var num = 0;
+			do{
+				var s = span[Math.floor(Math.random()*row*col)];
+				!reg.test(s) && s.classList.add('mine'), num++; 
+			}while(num != mine_num);
+		}
+
+		//周边雷数量
+		function setNum(){
+			span.forEach(function(el, i){
+				var num = 0;
+
+				//左上
+				i-col-1>0 && i%col!=0 && reg.test(span[i-col-1].classList.value) && num++;
+				//上
+				i-col>0 && reg.test(span[i-col].classList.value) && num++;
+				//上右
+				i-col+1>0 && (i-col+1)%col!=0 && reg.test(span[i-col+1].classList.value) && num++;
+				//右
+				i+1<col*row && (i+1)%col!=0 && reg.test(span[i+1].classList.value) && num++;
+				//右下
+				i+col+1<col*row && (i+col+1)%col!=0 && reg.test(span[i+col+1].classList.value) && num++;
+				//下
+				i+col<col*row && reg.test(span[i+col].classList.value) && num++;
+				//下左
+				i+col-1<col*row && i%col!=0 && reg.test(span[i+col-1].classList.value) && num++;
+				//左
+				i-1>0 && i%col!=0 && reg.test(span[i-1].classList.value) && num++;
+
+				num>0 && el.setAttribute('data-num', num);
+
+			});
+		}
+
+		//点击
+		function click(){
+
+			function el_reg(el){
+				var num = el.getAttribute('data-num');
+				num && (el.click());
+				var bool = !num && !reg.test(el.classList.value) && !/clicked/.test(el.classList.value);
+				return bool;
+			}
+
+			function blank(el, i){
+				el.classList.add('clicked');
+
+				//左上
+				span[i-col-1] && i%col!=0 && el_reg(span[i-col-1]) && (span[i-col-1].classList.add('clicked'), blank(span[i-col-1], i-col-1));
+					//上
+				span[i-col] && el_reg(span[i-col]) && (span[i-col].classList.add('clicked'), blank(span[i-col], i-col));
+					//上右
+				span[i-col+1] && (i-col+1)%col!=0 && el_reg(span[i-col+1]) && (span[i-col+1].classList.add('clicked'), blank(span[i-col+1], i-col+1));
+					//右
+				span[i+1] && (i+1)%col!=0 && el_reg(span[i+1]) && (span[i+1].classList.add('clicked'), blank(span[i+1], i+1));
+					//右下
+				span[i+col+1] && (i+col+1)%col!=0 && el_reg(span[i+col+1]) && (span[i+col+1].classList.add('clicked'), blank(span[i+col+1], i+col+1));
+					//下
+				span[i+col] && el_reg(span[i+col]) && (span[i+col].classList.add('clicked'), blank(span[i+col], i+col));
+					//下左
+				span[i+col-1] && i%col!=0 && el_reg(span[i+col-1]) && (span[i+col-1].classList.add('clicked'), blank(span[i+col-1], i+col-1));
+					//左
+				span[i-1] && i%col!=0 && el_reg(span[i-1]) && (span[i-1].classList.add('clicked'), blank(span[i-1], i-1));
+			}
+			span.forEach(function(el, i){
+				el.onclick = function(){
+
+					//是雷
+					var mine = reg.test(el.classList.value);
+					if(mine){
+						document.querySelectorAll('.mine').forEach(function(el, i){
+							el.classList.add('boom');
+						});
+						setTimeout(function(){
+							alert('YOU DIE');
+							init();
+						}, 10);
+						return;
+					}
+
+					//周边有雷
+					var num = this.getAttribute('data-num');
+					num && (this.classList.add('clicked'), this.innerHTML = num);
+
+					//空
+					num === null && blank(el, i);
+
+					if(document.querySelectorAll('.clicked').length == col*row-mine_num){
+						alert('YOU WIN');
+						init();
+					}
+				}
+				el.oncontextmenu = function(e){
+					e.preventDefault();
+					var has = /flag/.test(this.classList.value);
+					has? this.classList.remove('flag') : this.classList.add('flag');
+				}
+			})
+		}
+	</script>
+</body>
+</html>
