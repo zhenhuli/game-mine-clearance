@@ -96,21 +96,21 @@
 				var num = 0;
 
 				//左上
-				i-col-1>0 && i%col!=0 && reg.test(span[i-col-1].classList.value) && num++;
+				span[i-col-1] && i%col!=0 && reg.test(span[i-col-1].classList.value) && num++;
 				//上
-				i-col>0 && reg.test(span[i-col].classList.value) && num++;
+				span[i-col] && reg.test(span[i-col].classList.value) && num++;
 				//上右
-				i-col+1>0 && (i-col+1)%col!=0 && reg.test(span[i-col+1].classList.value) && num++;
+				span[i-col+1] && (i-col+1)%col!=0 && reg.test(span[i-col+1].classList.value) && num++;
 				//右
-				i+1<col*row && (i+1)%col!=0 && reg.test(span[i+1].classList.value) && num++;
+				span[i+1] && (i+1)%col!=0 && reg.test(span[i+1].classList.value) && num++;
 				//右下
-				i+col+1<col*row && (i+col+1)%col!=0 && reg.test(span[i+col+1].classList.value) && num++;
+				span[i+col+1] && (i+col+1)%col!=0 && reg.test(span[i+col+1].classList.value) && num++;
 				//下
-				i+col<col*row && reg.test(span[i+col].classList.value) && num++;
+				span[i+col] && reg.test(span[i+col].classList.value) && num++;
 				//下左
-				i+col-1<col*row && i%col!=0 && reg.test(span[i+col-1].classList.value) && num++;
+				span[i+col-1] && i%col!=0 && reg.test(span[i+col-1].classList.value) && num++;
 				//左
-				i-1>0 && i%col!=0 && reg.test(span[i-1].classList.value) && num++;
+				span[i-1] && i%col!=0 && reg.test(span[i-1].classList.value) && num++;
 
 				num>0 && el.setAttribute('data-num', num);
 
@@ -172,7 +172,7 @@
 						setTimeout(function(){
 							alert('YOU DIE');
 							init();
-						}, 300);
+						}, 500);
 						return;
 					}
 
@@ -186,8 +186,10 @@
 
 					//只剩雷时胜利
 					if(document.querySelectorAll('.clicked').length == col*row-mine_num){
-						alert('YOU WIN');
-						init();
+						setTimeout(function(){
+							alert('YOU WIN');
+							init();
+						}, 500);
 					}
 				}
 
