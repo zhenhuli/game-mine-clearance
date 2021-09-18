@@ -189,7 +189,7 @@
 					};
 
 					//只剩雷时胜利
-					if(document.querySelectorAll('.clicked').length == col*row-mine_num){
+					if(is_init && document.querySelectorAll('.clicked').length == col*row-mine_num){
 						setTimeout(function(){
 							alert('YOU WIN');
 							init();
